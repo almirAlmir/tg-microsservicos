@@ -4,6 +4,7 @@ from estoque.database import SessionLocal, engine, Base
 from estoque.models import Estoque
 from pydantic import BaseModel
 
+msg_produto_nao_encontrado_estoque = "Produto não encontrado no estoque"
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -45,7 +46,7 @@ def inicializar_estoque(request: InicializarEstoqueRequest, db: Session = Depend
 def reabastecer_estoque(request: BaixarEstoqueRequest, db: Session = Depends(get_db)):
     estoque = db.query(Estoque).filter(Estoque.produto_id == request.produto_id).first()
     if not estoque:
-        raise HTTPException(status_code=404, detail="Produto não encontrado no estoque")
+        raise HTTPException(status_code=404, detail=msg_produto_nao_encontrado_estoque)
     estoque.quantidade += request.quantidade
     db.commit()
     db.refresh(estoque)
@@ -68,14 +69,14 @@ def get_db():
 def get_estoque(produto_id: int, db: Session = Depends(get_db)):
     estoque = db.query(Estoque).filter(Estoque.produto_id == produto_id).first()
     if not estoque:
-        raise HTTPException(status_code=404, detail="Produto não encontrado no estoque")
+        raise HTTPException(status_code=404, detail=msg_produto_nao_encontrado_estoque)
     return estoque
 
 @app.post("/estoque/baixar", response_model=EstoqueResponse)
 def baixar_estoque(request: BaixarEstoqueRequest, db: Session = Depends(get_db)):
     estoque = db.query(Estoque).filter(Estoque.produto_id == request.produto_id).first()
     if not estoque:
-        raise HTTPException(status_code=404, detail="Produto não encontrado no estoque")
+        raise HTTPException(status_code=404, detail=msg_produto_nao_encontrado_estoque)
     if estoque.quantidade < request.quantidade:
         raise HTTPException(status_code=400, detail="Saldo insuficiente")
     estoque.quantidade -= request.quantidade

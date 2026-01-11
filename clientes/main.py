@@ -4,6 +4,8 @@ from clientes.database import SessionLocal, engine, Base
 from clientes.models import Cliente
 from pydantic import BaseModel
 
+msg_cliente_nao_encontrado = "Cliente não encontrado"
+
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
@@ -41,14 +43,14 @@ def criar_cliente(cliente: ClienteCreate, db: Session = Depends(get_db)):
 def get_cliente(id: int, db: Session = Depends(get_db)):
     cliente = db.query(Cliente).filter(Cliente.id == id).first()
     if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+        raise HTTPException(status_code=404, detail=msg_cliente_nao_encontrado)
     return cliente
 
 @app.patch("/clientes/{id}/fidelidade", response_model=ClienteResponse)
 def atualizar_fidelidade(id: int, fidelidade: FidelidadeUpdate, db: Session = Depends(get_db)):
     cliente = db.query(Cliente).filter(Cliente.id == id).first()
     if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+        raise HTTPException(status_code=404, detail=msg_cliente_nao_encontrado)
     cliente.nivel_fidelidade += fidelidade.incremento
     db.commit()
     db.refresh(cliente)

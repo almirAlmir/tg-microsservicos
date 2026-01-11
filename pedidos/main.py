@@ -5,6 +5,8 @@ from pedidos.database import SessionLocal, engine, Base
 from pedidos.models import Pedido
 from pydantic import BaseModel
 
+msg_produto_nao_encontrado_estoque = "Produto não encontrado no estoque"
+
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
@@ -59,7 +61,7 @@ async def criar_pedido(pedido: PedidoRequest, db: Session = Depends(get_db)):
             db.refresh(pedido_db)
             raise HTTPException(status_code=400, detail="Saldo insuficiente")
         elif resp_estoque.status_code != 200:
-            raise HTTPException(status_code=404, detail="Produto não encontrado no estoque")
+            raise HTTPException(status_code=404, detail=msg_produto_nao_encontrado_estoque)
 
         # Persistir pedido como aprovado
         status = "aprovado"
