@@ -51,7 +51,7 @@ def atualizar_fidelidade(id: int, fidelidade: FidelidadeUpdate, db: Session = De
     cliente = db.query(Cliente).filter(Cliente.id == id).first()
     if not cliente:
         raise HTTPException(status_code=404, detail=msg_cliente_nao_encontrado)
-    cliente.nivel_fidelidade += fidelidade.incremento
+    cliente.nivel_fidelidade += fidelidade.incremento # type: ignore
     db.commit()
     db.refresh(cliente)
     return cliente

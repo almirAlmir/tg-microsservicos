@@ -16,3 +16,6 @@ env/
 
 # OS
 .DS_Store
+
+# Arquivo que gerou a prova da inconsistencia no cliente
+prova_do_crime.py
